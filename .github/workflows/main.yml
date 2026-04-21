@@ -1,0 +1,11 @@
+name: Run Project
+
+on: [push]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Run script
+        run: echo "Your project is running"
