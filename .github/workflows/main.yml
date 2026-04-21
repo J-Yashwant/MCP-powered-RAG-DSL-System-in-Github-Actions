@@ -1,11 +1,50 @@
-name: Run Project
+name: Run Full Project
 
 on: [push]
 
 jobs:
   build:
     runs-on: ubuntu-latest
+
     steps:
-      - uses: actions/checkout@v3
-      - name: Run script
-        run: echo "Your project is running"
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      # ---------------- BACKEND ----------------
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.10"
+
+      - name: Install backend dependencies
+        run: |
+          pip install -r requirements.txt
+
+      - name: Run backend (test run)
+        run: |
+          nohup uvicorn main:app --host 0.0.0.0 --port 8000 &
+          sleep 10
+
+      # ---------------- FRONTEND ----------------
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18
+
+      - name: Install frontend
+        run: |
+          cd frontend
+          npm install
+
+      - name: Run frontend (test run)
+        run: |
+          cd frontend
+          nohup npm run dev &
+          sleep 10
+
+      # ---------------- VERIFY ----------------
+      - name: Check backend running
+        run: curl http://localhost:8000 || echo "Backend failed"
+
+      - name: Done
+        run: echo "Project ran successfully"
